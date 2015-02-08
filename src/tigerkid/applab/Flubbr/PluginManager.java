@@ -20,18 +20,17 @@ import tigerkid.applab.Plugin_Interfaces.*;
  * PluginManager: (Service)
  * This is the heart of the framework. PluginManager is the service that will bind to
  * the services of the plugins. All IPC communications will be handled here.
- * */
+ */
 public class PluginManager extends Service {
 
     /**
      * Constants section
-     * */
+     */
     private static final String LOG_TAG = "PluginManager";
-    private static final int BUMP_MSG = 1;
 
     /**
      * Private variables section
-     * */
+     */
     private OpServiceConnection opServiceConnection;    // Service to handle binding with plugins
     private IPluginInterface opService;                 // Interface object
     private String category;
@@ -39,19 +38,24 @@ public class PluginManager extends Service {
     private Handler h = new Handler();
     private String text;
 
-
-
+    /**
+     * Service onStart
+     */
     @Override
-    public void onStart(Intent intent, int startId) {
-        super.onStart(intent, startId);
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        //TODO do something useful
+        return Service.START_NOT_STICKY;
     }
 
+    /**
+     * Return PMIBinder to Binding Activity
+     */
     @Override
     public IBinder onBind(Intent intent) {
-        return pluginBinder;
+        return pmBinder;
     }
 
-    private final IBinder pluginBinder = new PMIBinder();
+    private final IBinder pmBinder = new PMIBinder();
 
     public void onDestroy() {
         super.onDestroy();
@@ -62,16 +66,17 @@ public class PluginManager extends Service {
      * PMIBinder:
      * IBinder to bind with PluginManager Service. An object of PMIBinder is returned
      * to main activity (Flubbr).
-     * */
+     */
     public class PMIBinder extends Binder {
         PluginManager getService() {
             // Return this instance of LocalService so clients can call public methods
             return PluginManager.this;
         }
+
         /**
          * bindPlugin:
          * Bind to plugin whose category is as specified
-         * */
+         */
         public void bindPlugin(String TAG, String ctgry) {
             //Get category
             if (!TAG.equals(Flubbr.BUNDLE_EXTRAS_CATEGORY))
@@ -124,14 +129,14 @@ public class PluginManager extends Service {
         /**
          * onServiceConnected:
          * Once connected to plugin's service, load the plugin and run it.
-         * */
+         */
         public void onServiceConnected(ComponentName className, IBinder boundService) {
             try {
                 opService = IPluginInterface.Stub.asInterface((IBinder) boundService);
                 Log.d(LOG_TAG, "onServiceConnected");
                 try {
                     opService.load(pluginConfiguration);
-                    opService.registerCB(pluginCallback);
+                    opService.registerCallback(pluginCallback);
                     text = "Plugin loaded";
                     h.post(new Runnable() {
                         @Override
@@ -168,14 +173,15 @@ public class PluginManager extends Service {
                 e.printStackTrace();
             }
         }
+
         /**
          * onServiceDisconnected:
          * Unload plugin and make opService null
-         * */
+         */
         public void onServiceDisconnected(ComponentName className) {
             Log.d(LOG_TAG, "PluginManager: onServiceDisconnected");
             try {
-                opService.unregisterCB(pluginCallback);
+                opService.unregisterCallback(pluginCallback);
                 opService.unload();
             } catch (RemoteException e) {
                 Log.e("PluginManager: onServiceConnected: ", "Failed to unload plugin");
@@ -192,23 +198,9 @@ public class PluginManager extends Service {
     private IPluginServiceCallback pluginCallback = new IPluginServiceCallback.Stub() {
         @Override
         public void receivedCallBack(PluginResponse pluginResponse) throws RemoteException {
-            if(pluginResponse!=null)
+            if (pluginResponse != null)
                 pluginResponse.describeContents();
         }
 
     };
-
-/*
-    private Handler mHandler = new Handler() {
-        @Override public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case BUMP_MSG:
-                    Toast.makeText(getApplicationContext(), "Received from service: " + msg.arg1, Toast.LENGTH_LONG).show();
-                    break;
-                default:
-                    super.handleMessage(msg);
-            }
-        }
-
-    };*/
 }

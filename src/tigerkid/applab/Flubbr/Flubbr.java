@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import tigerkid.applab.Plugin_Interfaces.IPluginInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,13 +26,13 @@ import java.util.List;
  * Flubbr: (ListActivity)
  * This is the entry-point activity of the app. It is a listActivity , each of its item being
  * an available plugin.
- * */
+ */
 
 public class Flubbr extends ListActivity {
 
     /**
      * Constants Section
-     * */
+     */
     public static final String ACTION_PICK_PLUGIN = "tigerkid.applab.intent.action.PICK_PLUGIN";
 
     static final String KEY_PKG = "pkg";
@@ -46,14 +45,14 @@ public class Flubbr extends ListActivity {
 
     /**
      * Private variables section
-     * */
+     */
 
     private PackageBroadcastReceiver packageBroadcastReceiver;
     private IntentFilter packageFilter;
     private ArrayList<HashMap<String, String>> services;
     private ArrayList<String> categories;
     private SimpleAdapter itemAdapter;
-    private PMServiceConnection pMServiceConnection;
+    private PMServiceConnection pmServiceConnection;
     private PluginManager.PMIBinder PMBinder;
 
 
@@ -95,20 +94,20 @@ public class Flubbr extends ListActivity {
         super.onStop();
         Log.d(LOG_TAG, "onStop");
         unregisterReceiver(packageBroadcastReceiver);
-
+        stopService(new Intent("tigerkid.applab.intent.action.PLUGIN_MGR"));
     }
 
     /**
      * bindPluginManager:
      * Binds to the PluginManager Service
-     * */
-     //TODO: Stop service to prevent leaks.
-     private void bindPluginManager() {
-        pMServiceConnection = new PMServiceConnection();
+     */
+    //TODO: Stop service to prevent leaks.
+    private void bindPluginManager() {
+        pmServiceConnection = new PMServiceConnection();
         Intent intent;
         intent = new Intent("tigerkid.applab.intent.action.PLUGIN_MGR");
         intent.addCategory("tigerkid.applab.intent.category.PLUGIN_MGR");
-        bindService(intent, pMServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService(intent, pmServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     /**
@@ -184,7 +183,7 @@ public class Flubbr extends ListActivity {
     /**
      * PackageBroadcastReceiver:
      * BroadcastReceiver for PackageManager.
-     * */
+     */
     //TODO: Register/unregister receiver at runtime to avoid battery drain.
     class PackageBroadcastReceiver extends BroadcastReceiver {
         private static final String LOG_TAG = "PackageBroadcastReceiver";
@@ -200,7 +199,7 @@ public class Flubbr extends ListActivity {
     /**
      * PMServiceConnection:
      * Class for handling PluginManager's ServiceConnection events.
-     * */
+     */
     class PMServiceConnection implements ServiceConnection {
 
         public void onServiceConnected(ComponentName className, IBinder boundService) {

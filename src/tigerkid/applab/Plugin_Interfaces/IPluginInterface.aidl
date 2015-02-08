@@ -12,6 +12,12 @@ import tigerkid.applab.Plugin_Interfaces.PluginConfiguration;
 import tigerkid.applab.Plugin_Interfaces.IPluginServiceCallback;
 
 interface IPluginInterface {
+
+	/**
+	* registerCallback:
+	* Register callbacks for binding services.
+	*/
+    void registerCallback(IPluginServiceCallback ipsc);
 	/**
 	 * load:
 	 * Initialize the plugin with the inbound data from host and register callbacks.
@@ -27,6 +33,9 @@ interface IPluginInterface {
      * Deinitalize plugin, unregister callbacks, cleanup.
      */
     void unload();
-    void registerCB(IPluginServiceCallback ipsc);
-    void unregisterCB(IPluginServiceCallback ipsc);
+    /**
+     * unegisterCallback:
+     * Unregister callbacks for binding services.
+     */
+    void unregisterCallback(IPluginServiceCallback ipsc);
 }

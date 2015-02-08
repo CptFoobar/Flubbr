@@ -11,5 +11,9 @@ import tigerkid.applab.Plugin_Interfaces.PluginResponse;
  * Oneway interface for remote callbacks.
  */
 oneway interface IPluginServiceCallback {
+	/**
+	 * receivedCallBack:
+	 * Make callbacks using receivedCallback.
+	 */
 	void receivedCallBack(inout PluginResponse pluginResponse);
 }

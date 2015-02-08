@@ -4,10 +4,11 @@
  */
 
 package tigerkid.applab.Flubbr;
+
 /**
  * PluginRequestBuffer:
  * Class to serve as a Buffer for incoming plugin requests.
- * */
+ */
 public class PluginRequestBuffer {
     //TODO: Priority queue with key being the time of request arrival?
 }
