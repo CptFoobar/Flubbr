@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT license.
  */
 
-package tigerkid.applab.Plugin_Architecture;
+package tigerkid.applab.Flubbr;
 
 import android.app.ListActivity;
 import android.content.*;
@@ -102,7 +102,8 @@ public class Flubbr extends ListActivity {
      * bindPluginManager:
      * Binds to the PluginManager Service
      * */
-    private void bindPluginManager() {
+     //TODO: Stop service to prevent leaks.
+     private void bindPluginManager() {
         pMServiceConnection = new PMServiceConnection();
         Intent intent;
         intent = new Intent("tigerkid.applab.intent.action.PLUGIN_MGR");

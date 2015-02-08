@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT license.
  */
 
-package tigerkid.applab.Plugin_Architecture;
+package tigerkid.applab.Flubbr;
 /**
  * PluginRequestBuffer:
  * Class to serve as a Buffer for incoming plugin requests.

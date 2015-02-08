@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT license.
  */
 
-package tigerkid.applab.Plugin_Architecture;
+package tigerkid.applab.Flubbr;
 
 import android.app.Service;
 import android.content.ComponentName;
@@ -121,7 +121,6 @@ public class PluginManager extends Service {
      * Handles Plugins' ServiceConnection events.
      */
     class OpServiceConnection implements ServiceConnection {
-
         /**
          * onServiceConnected:
          * Once connected to plugin's service, load the plugin and run it.
@@ -132,6 +131,7 @@ public class PluginManager extends Service {
                 Log.d(LOG_TAG, "onServiceConnected");
                 try {
                     opService.load(pluginConfiguration);
+                    opService.registerCB(pluginCallback);
                     text = "Plugin loaded";
                     h.post(new Runnable() {
                         @Override
@@ -163,12 +163,9 @@ public class PluginManager extends Service {
                         }
                     });
                     e.printStackTrace();
-                    return;
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
-                return;
             }
         }
         /**
@@ -178,6 +175,7 @@ public class PluginManager extends Service {
         public void onServiceDisconnected(ComponentName className) {
             Log.d(LOG_TAG, "PluginManager: onServiceDisconnected");
             try {
+                opService.unregisterCB(pluginCallback);
                 opService.unload();
             } catch (RemoteException e) {
                 Log.e("PluginManager: onServiceConnected: ", "Failed to unload plugin");
@@ -194,20 +192,13 @@ public class PluginManager extends Service {
     private IPluginServiceCallback pluginCallback = new IPluginServiceCallback.Stub() {
         @Override
         public void receivedCallBack(PluginResponse pluginResponse) throws RemoteException {
-           //     mHandler.sendMessage(mHandler.obtainMessage(BUMP_MSG, 0/*value*/,0));
-            pluginResponse.describeContents();
+            if(pluginResponse!=null)
+                pluginResponse.describeContents();
         }
-        /**
-         * This is called by the remote service regularly to tell us about
-         * new values.  Note that IPC calls are dispatched through a thread
-         * pool running in each process, so the code executing here will
-         * NOT be running in our main thread like most other things -- so,
-         * to update the UI, we need to use a Handler to hop over there.
-         */
 
     };
 
-
+/*
     private Handler mHandler = new Handler() {
         @Override public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -219,5 +210,5 @@ public class PluginManager extends Service {
             }
         }
 
-    };
+    };*/
 }
