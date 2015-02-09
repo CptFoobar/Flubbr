@@ -15,6 +15,9 @@ import android.util.Log;
 import android.widget.Toast;
 import tigerkid.applab.Plugin_Interfaces.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * PluginManager: (Service)
@@ -39,11 +42,16 @@ public class PluginManager extends Service {
     private String text;
 
     /**
+     * Public variables
+     */
+    public Map connectedPlugins;
+
+
+    /**
      * Service onStart
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //TODO do something useful
         return Service.START_NOT_STICKY;
     }
 
@@ -52,14 +60,20 @@ public class PluginManager extends Service {
      */
     @Override
     public IBinder onBind(Intent intent) {
+        connectedPlugins = new HashMap();
         return pmBinder;
     }
 
     private final IBinder pmBinder = new PMIBinder();
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+      releaseOpService();
+        return false;
+    }
+
     public void onDestroy() {
         super.onDestroy();
-        releaseOpService();
     }
 
     /**
@@ -110,16 +124,9 @@ public class PluginManager extends Service {
      * Unload the plugin and release the plugin service.
      */
     private void releaseOpService() {
-        try {
-            opService.unload();
-        } catch (RemoteException e) {
-            Log.e("InvokePlugin:: releaseOpService: ", "Failed to unload plugin.");
-            e.printStackTrace();
-        }
-        unbindService(opServiceConnection);
-        opServiceConnection = null;
+        if(opServiceConnection!=null)
+            unbindService(opServiceConnection);
     }
-
 
     /**
      * OpServiceConnection:

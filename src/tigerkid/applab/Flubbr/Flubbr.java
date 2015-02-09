@@ -81,22 +81,20 @@ public class Flubbr extends ListActivity {
         packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         packageFilter.addCategory(Intent.CATEGORY_DEFAULT);
         packageFilter.addDataScheme("package");
+        registerReceiver(packageBroadcastReceiver, packageFilter);
         bindPluginManager();
     }
 
     protected void onStart() {
         super.onStart();
         Log.d(LOG_TAG, "onStart");
-        registerReceiver(packageBroadcastReceiver, packageFilter);
     }
 
     protected void onDestroy() {
-        super.onStop();
+        super.onDestroy();
         Log.d(LOG_TAG, "onDestroy");
         unregisterReceiver(packageBroadcastReceiver);
-        stopService(new Intent("tigerkid.applab.intent.action.PLUGIN_MGR"));
-        pmServiceConnection = null;
-
+        unbindService(pmServiceConnection);
     }
 
     protected void onPause() {
@@ -108,7 +106,6 @@ public class Flubbr extends ListActivity {
      * bindPluginManager:
      * Binds to the PluginManager Service
      */
-    //TODO: Stop service to prevent leaks.
     private void bindPluginManager() {
         pmServiceConnection = new PMServiceConnection();
         Intent intent;
