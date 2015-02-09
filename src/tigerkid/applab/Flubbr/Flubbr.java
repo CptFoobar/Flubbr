@@ -90,11 +90,18 @@ public class Flubbr extends ListActivity {
         registerReceiver(packageBroadcastReceiver, packageFilter);
     }
 
-    protected void onStop() {
+    protected void onDestroy() {
         super.onStop();
-        Log.d(LOG_TAG, "onStop");
+        Log.d(LOG_TAG, "onDestroy");
         unregisterReceiver(packageBroadcastReceiver);
         stopService(new Intent("tigerkid.applab.intent.action.PLUGIN_MGR"));
+        pmServiceConnection = null;
+
+    }
+
+    protected void onPause() {
+        super.onPause();
+        Log.d(LOG_TAG, "onPause");
     }
 
     /**
