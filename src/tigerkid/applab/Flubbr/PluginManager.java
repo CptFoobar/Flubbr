@@ -34,8 +34,8 @@ public class PluginManager extends Service {
     /**
      * Private variables section
      */
-    private OpServiceConnection opServiceConnection;    // Service to handle binding with plugins
-    private IPluginInterface opService;                 // Interface object
+    private PluginServiceConnection pluginServiceConnection;    // Service to handle binding with plugins
+    private IPluginInterface opService;                         // Interface object
     private String category;
     private PluginConfiguration pluginConfiguration;
     private Handler h = new Handler();
@@ -44,8 +44,9 @@ public class PluginManager extends Service {
     /**
      * Public variables
      */
-    public Map connectedPlugins;
-
+    // Hashmap to store plugins info
+    public Map<String, PluginServiceConnection> connectionMap;        // Key: Plugin's intent.category, Value: Plugin's ServiceConnection
+    public Map<PluginServiceConnection, IPluginInterface> serviceMap;           // Key: Plugin's ServiceConnection, Value: Plugin's IBinder
 
     /**
      * Service onStart
@@ -60,15 +61,16 @@ public class PluginManager extends Service {
      */
     @Override
     public IBinder onBind(Intent intent) {
-        connectedPlugins = new HashMap();
+        connectionMap = new HashMap<String, PluginServiceConnection>();
+        serviceMap = new HashMap<PluginServiceConnection, IPluginInterface>();
         return pmBinder;
     }
 
-    private final IBinder pmBinder = new PMIBinder();
+    private final IBinder pmBinder = new PMIBinder();   //Plugin Manager's binder. Returned to the binding activity.
 
     @Override
     public boolean onUnbind(Intent intent) {
-      releaseOpService();
+        releaseAllServiceConnections();
         return false;
     }
 
@@ -93,12 +95,15 @@ public class PluginManager extends Service {
          */
         public void bindPlugin(String TAG, String ctgry) {
             //Get category
-            if (!TAG.equals(Flubbr.BUNDLE_EXTRAS_CATEGORY))
-                return;
-            else {
+            if (TAG.equals(Flubbr.BUNDLE_EXTRAS_CATEGORY)) {
                 if (ctgry != null) {
                     category = ctgry;
-                    bindOpService();
+                    PluginServiceConnection psc = bindServiceConnection();
+                    if (psc != null) {
+                        connectionMap.put(ctgry, psc);
+                        System.out.println("Added to connectionMap: " + ctgry);
+                        System.out.println("connectionMap is " + connectionMap.toString());
+                    }
                 }
             }
         }
@@ -108,38 +113,52 @@ public class PluginManager extends Service {
      * bindOpService:
      * Binds to the service of the plugin picked from the listView.
      */
-    private void bindOpService() {
+    private PluginServiceConnection bindServiceConnection() {
         if (category != null) {
             pluginConfiguration = new PluginConfiguration("Plugins rock!", 12);
             pluginConfiguration.describeContents();
-            opServiceConnection = new OpServiceConnection();
+            pluginServiceConnection = new PluginServiceConnection();
             Intent i = new Intent(Flubbr.ACTION_PICK_PLUGIN);
             i.addCategory(category);
-            bindService(i, opServiceConnection, Context.BIND_AUTO_CREATE);
+            bindService(i, pluginServiceConnection, Context.BIND_AUTO_CREATE);
+            return pluginServiceConnection;
         }
+        return null;
     }
 
     /**
      * releaseOpService:
      * Unload the plugin and release the plugin service.
      */
-    private void releaseOpService() {
-        if(opServiceConnection!=null)
-            unbindService(opServiceConnection);
+    private void releaseAllServiceConnections() {
+      /*  if (pluginServiceConnection != null)
+            unbindService(pluginServiceConnection);*/
+        //Unbind all service connections in connectionMap
+        for (String i : connectionMap.keySet()) {
+            if (connectionMap.get(i) != null)
+                System.out.println("Unplugging " + i);
+            unbindService(connectionMap.get(i));
+        }
+        connectionMap.clear();
+        //clear serviceMap
+        serviceMap.clear();
     }
 
     /**
      * OpServiceConnection:
      * Handles Plugins' ServiceConnection events.
      */
-    class OpServiceConnection implements ServiceConnection {
+    class PluginServiceConnection implements ServiceConnection {
         /**
          * onServiceConnected:
          * Once connected to plugin's service, load the plugin and run it.
          */
         public void onServiceConnected(ComponentName className, IBinder boundService) {
             try {
-                opService = IPluginInterface.Stub.asInterface((IBinder) boundService);
+                opService = IPluginInterface.Stub.asInterface(boundService);
+                serviceMap.put(connectionMap.get(category), opService);
+                System.out.println("Added to serviceMap: " + category + "'s ServiceConnection.");
+                System.out.println("serviceMap is " + serviceMap.toString());
                 Log.d(LOG_TAG, "onServiceConnected");
                 try {
                     opService.load(pluginConfiguration);
@@ -165,6 +184,13 @@ public class PluginManager extends Service {
                 }
                 try {
                     opService.run();
+                    text = "Plugin running";
+                    h.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
+                        }
+                    });
                 } catch (RemoteException e) {
                     Log.d("InvokePlugin::onServiceConnected: ", "Failed to run plugin.");
                     text = "Oops! It looks like the plugin failed to run. Try restarting the app.";
