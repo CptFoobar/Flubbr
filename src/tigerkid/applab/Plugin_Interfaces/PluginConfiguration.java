@@ -8,10 +8,6 @@ package tigerkid.applab.Plugin_Interfaces;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * PluginConfiguration:
- * Parcelable object for sending initial values to plugin.
- * */
 public class PluginConfiguration implements Parcelable {
 
     String mString;
@@ -25,6 +21,9 @@ public class PluginConfiguration implements Parcelable {
         return 0;
     }
 
+    /**
+     * Storing the PluginResponse data to Parcel object
+     **/
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mString);
@@ -32,7 +31,6 @@ public class PluginConfiguration implements Parcelable {
     }
 
     /**
-     * PluginConfiguration:
      * A constructor that initializes the PluginResponse object
      **/
     public PluginConfiguration(String sName, int sAge){
@@ -40,16 +38,26 @@ public class PluginConfiguration implements Parcelable {
         this.mInt = sAge;
     }
 
+    /**
+     * Retrieving PluginResponse data from Parcel object
+     * This constructor is invoked by the method createFromParcel(Parcel source) of
+     * the object CREATOR
+     **/
     private PluginConfiguration(Parcel in){
         this.mString = in.readString();
         this.mInt = in.readInt();
     }
-    /**
-     * getPluginConfiguration:
-     * Returns PluginConfiguration with data identical to that of 'in'
-     * */
-    public PluginConfiguration getPluginConfiguration(PluginConfiguration in){
-        return new PluginConfiguration(in.mString, in.mInt);
+
+    public String getmString(){
+        return mString;
+    }
+
+    public int getmInt(){
+        return mInt;
+    }
+
+    public PluginConfiguration getPluginConfiguration(){
+        return new PluginConfiguration(this.mString, this.mInt);
     }
 
     public static final Parcelable.Creator<PluginConfiguration> CREATOR = new Parcelable.Creator<PluginConfiguration>() {

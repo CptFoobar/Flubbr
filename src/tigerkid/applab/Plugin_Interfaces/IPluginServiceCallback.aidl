@@ -6,10 +6,7 @@
 package tigerkid.applab.Plugin_Interfaces;
 
 import tigerkid.applab.Plugin_Interfaces.PluginResponse;
-/**
- * IPluginServiceCallback:
- * Oneway interface for remote callbacks.
- */
+
 oneway interface IPluginServiceCallback {
 	/**
 	 * receivedCallBack:

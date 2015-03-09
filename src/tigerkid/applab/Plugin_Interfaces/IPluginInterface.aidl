@@ -4,10 +4,7 @@
  */
 
 package tigerkid.applab.Plugin_Interfaces;
-/**
- * IPluginInterface:
- * Interface for connection and execution of plugins.
- */
+
 import tigerkid.applab.Plugin_Interfaces.PluginConfiguration;
 import tigerkid.applab.Plugin_Interfaces.IPluginServiceCallback;
 
@@ -28,6 +25,11 @@ interface IPluginInterface {
      * Let the plugin do the dance.
      */
     void run();
+	/**
+     * update:
+     * Receive update from host.
+     */
+    void update(in PluginConfiguration pluginConfiguration);
 	/**
      * unload:
      * Deinitalize plugin, unregister callbacks, cleanup.
