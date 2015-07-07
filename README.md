@@ -1,3 +1,6 @@
+#### DEPRECATED
+This project is no longer maintained since an advanced implementation of this has been developed for Amethyst Grid.
+
 # Flubbr
 Flubbr, a flexible android plugin framework.<br>
 Though still at a very young stage of development, the framework is capable of:<br>
